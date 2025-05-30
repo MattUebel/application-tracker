@@ -1,7 +1,8 @@
 fastapi
 uvicorn[standard]
 sqlalchemy
-psycopg2-binary
+alembic
+python-dotenv
 jinja2
 python-multipart
-alembic 
+asyncpg 

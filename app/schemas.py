@@ -34,6 +34,7 @@ class JobApplicationBase(BaseModel):
     bonus: Optional[float] = None # e.g., 0.10 for 10%
     health_coverage: Optional[bool] = False
     pto: Optional[str] = None
+    is_active: Optional[bool] = True
 
 class JobApplicationCreate(JobApplicationBase):
     pass
@@ -57,10 +58,12 @@ class JobApplicationUpdate(JobApplicationBase):
     bonus: Optional[float] = None
     health_coverage: Optional[bool] = None
     pto: Optional[str] = None
+    is_active: Optional[bool] = None
 
 class JobApplication(JobApplicationBase):
     id: int
     notes: List[Note] = []
+    is_active: bool # Must be present when reading from DB
 
     class Config:
         from_attributes = True # Changed from orm_mode for Pydantic v2
@@ -71,6 +74,7 @@ class JobApplicationSimple(BaseModel): # For listing on the main page
     role: str
     application_date: Optional[date] = None
     status: Optional[str] = None
+    is_active: bool
 
     class Config:
         from_attributes = True 

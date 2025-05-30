@@ -21,6 +21,7 @@ class JobApplication(Base):
     bonus = Column(Float, nullable=True)  # Representing percentage, e.g., 0.10 for 10%
     health_coverage = Column(Boolean, default=False)
     pto = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
 
     notes = relationship("Note", back_populates="application", order_by="desc(Note.id)")
 
