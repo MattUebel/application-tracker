@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import desc, select, or_ # Import or_ for combining search conditions
+from sqlalchemy.orm import selectinload # Added for eager loading
 from . import models, schemas
 from typing import List, Optional
 from pydantic import HttpUrl
@@ -7,11 +8,15 @@ from pydantic import HttpUrl
 # --- Job Application CRUD --- 
 
 async def get_job_application(db: AsyncSession, application_id: int) -> Optional[models.JobApplication]:
-    result = await db.execute(select(models.JobApplication).filter(models.JobApplication.id == application_id))
+    result = await db.execute(
+        select(models.JobApplication)
+        .options(selectinload(models.JobApplication.notes))
+        .filter(models.JobApplication.id == application_id)
+    )
     return result.scalars().first()
 
 async def get_job_applications(db: AsyncSession, skip: int = 0, limit: int = 100, is_active: Optional[bool] = True, search_term: Optional[str] = None) -> List[models.JobApplication]:
-    query = select(models.JobApplication)
+    query = select(models.JobApplication).options(selectinload(models.JobApplication.notes))
     if is_active is not None:
         query = query.filter(models.JobApplication.is_active == is_active)
     if search_term:
