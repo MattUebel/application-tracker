@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import FastAPI, Request, Depends, Form, HTTPException
+from fastapi import FastAPI, Request, Depends, Form, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -33,28 +33,31 @@ templates = Jinja2Templates(directory="app/templates")
 # --- HTML Routes ---
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request, db: AsyncSession = Depends(get_db), view: Optional[str] = "active"):
+async def read_root(request: Request, db: AsyncSession = Depends(get_db), view: Optional[str] = "active", search: Optional[str] = Query(None)):
+    current_is_active_filter: Optional[bool]
     if view == "active":
-        applications = await crud.get_job_applications(db, skip=0, limit=100, is_active=True)
+        current_is_active_filter = True
     elif view == "inactive":
-        applications = await crud.get_job_applications(db, skip=0, limit=100, is_active=False)
+        current_is_active_filter = False
     elif view == "all":
-        applications = await crud.get_job_applications(db, skip=0, limit=100, is_active=None)
+        current_is_active_filter = None
     else: # Default to active
-        applications = await crud.get_job_applications(db, skip=0, limit=100, is_active=True)
-        view = "active" # Ensure current_view is correctly set
-
+        current_is_active_filter = True
+        view = "active"
+    
+    applications = await crud.get_job_applications(db, skip=0, limit=100, is_active=current_is_active_filter, search_term=search)
+    
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "applications": applications, "current_year": datetime.now().year, "current_view": view}
+        {"request": request, "applications": applications, "current_year": datetime.now().year, "current_view": view, "search_term": search}
     )
 
 @app.get("/inactive", response_class=HTMLResponse)
-async def read_inactive_applications(request: Request, db: AsyncSession = Depends(get_db)):
-    applications = await crud.get_job_applications(db, skip=0, limit=100, is_active=False)
+async def read_inactive_applications(request: Request, db: AsyncSession = Depends(get_db), search: Optional[str] = Query(None)):
+    applications = await crud.get_job_applications(db, skip=0, limit=100, is_active=False, search_term=search)
     return templates.TemplateResponse(
-        "inactive_applications.html", # We will create this template later
-        {"request": request, "applications": applications, "current_year": datetime.now().year}
+        "inactive_applications.html",
+        {"request": request, "applications": applications, "current_year": datetime.now().year, "search_term": search}
     )
 
 @app.get("/applications/{application_id}", response_class=HTMLResponse)
