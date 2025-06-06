@@ -5,4 +5,5 @@ alembic
 python-dotenv
 jinja2
 python-multipart
-asyncpg 
+asyncpg
+psycopg2-binary 

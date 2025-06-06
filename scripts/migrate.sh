@@ -28,7 +28,7 @@ fi
 # Run Alembic commands in the app container
 case "$1" in
   init)
-    docker compose run --rm -w /app/app web alembic init -t async migrations
+    docker compose run --rm -w /app/app web alembic init migrations
     ;;
   migrate)
     shift
